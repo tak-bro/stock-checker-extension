@@ -9,7 +9,7 @@ import { TAB_ID } from './tab-id.injector';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   private readonly _message = new Subject<string>();
 
   readonly tabId = this._tabId;
@@ -19,6 +19,12 @@ export class AppComponent {
 
   constructor(@Inject(TAB_ID) private readonly _tabId: number,
               private readonly _changeDetector: ChangeDetectorRef) {}
+
+  ngOnInit() {
+    this.message$.subscribe(message => {
+      console.log(message);
+    })
+  }
 
   onStart() {
     chrome.tabs.sendMessage(this.tabId, { message: 'CHECK_CART_FORM', tabId: this.tabId }, response => {
