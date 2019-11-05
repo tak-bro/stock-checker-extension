@@ -1,6 +1,8 @@
 import { of } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import {delay, filter, map, retry, switchMap, tap} from 'rxjs/operators';
 import { fromEvent } from 'rxjs/internal/observable/fromEvent';
+import {bindCallback} from 'rxjs/internal/observable/bindCallback';
+import {Observable} from 'rxjs/internal/Observable';
 
 chrome.runtime.onMessage.addListener((request, sender, respond) => {
     if (!request) {
@@ -17,6 +19,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
                 }
                 return cartForm ? true : false;
             }),
+            delay(300),
             switchMap((cartForm) => {
                 // check form element
                 const isHideCartForm = cartForm.classList.contains('hide');
@@ -29,13 +32,17 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
             switchMap(() => of(document.getElementById('addToCartSubmit'))),
             tap((addToCartButtonElement) => addToCartButtonElement.click()),
             switchMap((addToCartButtonElement) => fromEvent(addToCartButtonElement, 'click')),
-            map(() => 'Done!'),
+            map(() => 'done'),
         );
 
         const refreshPage$ = checkCartFormElement$.pipe(
             filter(isHide => isHide ? true : false),
-            tap(() => chrome.runtime.sendMessage({ message: 'REFRESH_PAGE', tabId: tabId })),
-            map(() => 'Refresh!')
+            switchMap(() => {
+                const sendMessageStructure = (message: any, callback: (result: any) => void) => chrome.runtime.sendMessage(message, callback);
+                const sendMessageCallback$ = bindCallback(sendMessageStructure);
+                return sendMessageCallback$({ message: 'REFRESH_PAGE', tabId: tabId });
+            }),
+            filter(res => res === 'RELOADED' ? true : false),
         );
 
         addToCart$.subscribe(res => respond(res));
@@ -43,4 +50,6 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     } else {
         console.log(`Message: ${message}, TabId: ${tabId}`);
     }
+
+    return true;
 });

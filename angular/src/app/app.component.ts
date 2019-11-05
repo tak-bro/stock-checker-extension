@@ -21,20 +21,28 @@ export class AppComponent implements OnInit {
               private readonly _changeDetector: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.message$.subscribe(message => {
+    this.message$.pipe(filter(res => res ? true : false)).subscribe(message => {
       console.log(message);
+      // if (message === 'RELOADED') {
+      //   chrome.tabs.sendMessage(this.tabId, { message: 'CHECK_CART_FORM', tabId: this.tabId }, response => {
+      //     this._message.next(response);
+      //   });
+      // }
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {message: 'CHECK_CART_FORM_', tabId: this.tabId }, function(response) {
+          console.log(`message from background: ${JSON.stringify(response)}`);
+        });
+      });
     })
   }
 
   onStart() {
     chrome.tabs.sendMessage(this.tabId, { message: 'CHECK_CART_FORM', tabId: this.tabId }, response => {
-      this._message.next(chrome.runtime.lastError ? 'Error!' : response);
+      this._message.next(response);
     });
   }
 
   onStop() {
-    chrome.tabs.sendMessage(this.tabId, { message: 'STOP_REFRESH', tabId: this.tabId }, response => {
-      this._message.next(chrome.runtime.lastError ? 'Error!' : response);
-    });
+    this._message.next('stop');
   }
 }
