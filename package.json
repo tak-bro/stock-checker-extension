@@ -1,8 +1,8 @@
 {
   "name": "angular-chrome-extension",
   "version": "1.0.0",
-  "author": "Lars Kniep",
-  "description": "Angular google chrome extension scaffold",
+  "author": "Hyungtak Jin",
+  "description": "chrome extension for louisvuitton page",
   "scripts": {
     "ng": "ng",
     "build:angular": "ng build",
