@@ -7,12 +7,10 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
 
     const { message, tabId } = request;
     if (message === 'REFRESH_PAGE') {
+        chrome.tabs.reload();
         setTimeout(() => {
-            chrome.tabs.reload();
-            chrome.tabs.sendMessage(tabId, { message: 'CHECK_CART_FORM', tabId: tabId }, res => {
-                console.log(res);
-            });
-        }, 4000);
+            chrome.tabs.sendMessage(tabId, { message: 'CHECK_CART_FORM', tabId: tabId });
+        }, 3000);
     } else if (message === 'STOP_REFRESH') {
         // do nothing
     }
