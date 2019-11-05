@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "js": ["contentPage.js"],
-      "matches": ["<all_urls>"]
+      "matches": ["https://kr.louisvuitton.com/*"]
     }
   ],
   "background": {

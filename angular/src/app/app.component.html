@@ -6,5 +6,6 @@
 </div>
 <h2>Current TAB ID: {{ tabId }}</h2>
 <p>You can easily send messages to the content page with the provided Tab ID!</p>
-<button (click)="onClick()">Click me to test</button>
+<button (click)="onStart()">Start</button>
+<button (click)="onStop()">Stop</button>
 <div><strong>{{ message$ | async }}</strong></div>
