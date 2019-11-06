@@ -1,8 +1,6 @@
 import { of } from 'rxjs';
-import {delay, filter, map, retry, switchMap, tap} from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { fromEvent } from 'rxjs/internal/observable/fromEvent';
-import {bindCallback} from 'rxjs/internal/observable/bindCallback';
-import {Observable} from 'rxjs/internal/Observable';
 
 chrome.runtime.onMessage.addListener((request, sender, respond) => {
     if (!request) {
@@ -41,9 +39,10 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
 
         addToCart$.subscribe(res => respond(res));
         refreshPage$.subscribe(res => respond(res));
+
     } else {
         console.log(`Message: ${message}, TabId: ${tabId}`);
-        respond('unknown message from Content');
+        respond('Unknown message from ContentPage');
     }
 
     return true;

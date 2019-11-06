@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         });
     } else {
         console.log(`Message: ${message}, TabId: ${tabId}`);
-        respond('unknown message from Background');
+        respond('Unknown message from backgroundPage');
     }
 
     return true;

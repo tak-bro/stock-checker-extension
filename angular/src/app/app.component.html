@@ -8,4 +8,4 @@
 <p>You can easily send messages to the content page with the provided Tab ID!</p>
 <button (click)="onStart()">Start</button>
 <button (click)="onStop()">Stop</button>
-<div><strong>{{ message$ | async }}</strong></div>
+<div><strong>{{ isPossible ? 'Checking...' : 'Stopped!' }}</strong></div>
