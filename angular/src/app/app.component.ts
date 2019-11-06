@@ -38,7 +38,6 @@ export class AppComponent implements OnInit {
     }
 
     onStop() {
-        alert('Stopped!');
         this.isPossible = false;
     }
 

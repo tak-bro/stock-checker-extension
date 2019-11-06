@@ -1,4 +1,4 @@
-const REFRESH_DELAY = 5000;
+const REFRESH_DELAY = 10000;
 let count = 0;
 
 chrome.runtime.onMessage.addListener((request, sender, respond) => {
