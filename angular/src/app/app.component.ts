@@ -20,42 +20,54 @@ export class AppComponent implements OnInit {
     constructor(@Inject(TAB_ID) private readonly tabId: number) {}
 
     ngOnInit() {
-        this.message$.pipe(
+        const validMessage$ = this.message$.pipe(
             filter(() => this.isPossible),
             filter(message => message ? true : false),
-        ).subscribe(message => {
-            switch (message) {
-                case 'DONE':
-                    alert('Added to cart!');
-                    this.isPossible = false;
-                    break;
-                case 'REFRESH':
-                    chrome.runtime.sendMessage({ message: 'REFRESH_PAGE', tabId: this.currentTabId }, response => {
-                        this.message.next(response);
-                    });
-                    break;
-                case 'RELOADED':
-                default:
-                    chrome.runtime.sendMessage({ message: 'INITIAL_LOAD', tabId: this.currentTabId }, response => {
-                        this.message.next(response);
-                    });
-                    break;
-            }
+        );
 
-            this.count = this.count + 1;
-            console.log(`Message: ${message} - ${this.count}`);
+        // check response from event
+        validMessage$.subscribe(message => {
+            this.manageResponseMessage(message);
+            this.setLog(message);
         });
     }
 
     onStart() {
         this.isPossible = true;
+        this.checkInitialPage();
+    }
+
+    onStop() {
+        alert('Stopped!');
+        this.isPossible = false;
+    }
+
+    private manageResponseMessage(message: string) {
+        switch (message) {
+            case 'REFRESH':
+                this.refreshPage();
+                break;
+            case 'RELOADED':
+            default:
+                this.checkInitialPage();
+                break;
+        }
+    }
+
+    private refreshPage() {
+        chrome.runtime.sendMessage({ message: 'REFRESH_PAGE', tabId: this.currentTabId }, response => {
+            this.message.next(response);
+        });
+    }
+
+    private checkInitialPage() {
         chrome.runtime.sendMessage({ message: 'INITIAL_LOAD', tabId: this.currentTabId }, response => {
             this.message.next(response);
         });
     }
 
-    onStop() {
-        alert('Stopped!'); // TODO: add stopped
-        this.isPossible = false;
+    private setLog(message: string) {
+        this.count = this.count + 1;
+        console.log(`Message: ${message} - ${this.count}`);
     }
 }
