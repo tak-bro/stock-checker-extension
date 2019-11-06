@@ -5,44 +5,50 @@ import {filter, tap} from 'rxjs/operators';
 import { TAB_ID } from './tab-id.injector';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  private readonly _message = new Subject<string>();
 
-  readonly tabId = this._tabId;
-  readonly message$ = this._message.asObservable().pipe(
-    tap(() => setTimeout(() => this._changeDetector.detectChanges()))
-  );
+    private readonly message = new Subject<string>();
+    private readonly currentTabId = this.tabId;
+    private readonly message$ = this.message.asObservable();
 
-  constructor(@Inject(TAB_ID) private readonly _tabId: number,
-              private readonly _changeDetector: ChangeDetectorRef) {}
+    constructor(@Inject(TAB_ID) private readonly tabId: number) {}
 
-  ngOnInit() {
-    this.message$.pipe(filter(res => res ? true : false)).subscribe(message => {
-      console.log(message);
-      // if (message === 'RELOADED') {
-      //   chrome.tabs.sendMessage(this.tabId, { message: 'CHECK_CART_FORM', tabId: this.tabId }, response => {
-      //     this._message.next(response);
-      //   });
-      // }
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {message: 'CHECK_CART_FORM_', tabId: this.tabId }, function(response) {
-          console.log(`message from background: ${JSON.stringify(response)}`);
+    ngOnInit() {
+        this.message$.pipe(filter(res => res ? true : false)).subscribe(message => {
+            console.log('message: ', message);
+
+            switch (message) {
+                case 'DONE':
+                    alert('Added to cart!');
+                    break;
+                case 'REFRESH':
+                    chrome.runtime.sendMessage({ message: 'REFRESH_PAGE', tabId: this.currentTabId }, response => {
+                        this.message.next(response);
+                    });
+                    break;
+                case 'RELOADED':
+                    chrome.runtime.sendMessage({ message: 'INITIAL_LOAD', tabId: this.currentTabId }, response => {
+                        this.message.next(response);
+                    });
+                    break;
+                case 'STOP':
+                    alert('Stopped!'); // TODO: add stopped
+                    break;
+            }
         });
-      });
-    })
-  }
+    }
 
-  onStart() {
-    chrome.tabs.sendMessage(this.tabId, { message: 'CHECK_CART_FORM', tabId: this.tabId }, response => {
-      this._message.next(response);
-    });
-  }
+    onStart() {
+        chrome.runtime.sendMessage({ message: 'INITIAL_LOAD', tabId: this.currentTabId }, response => {
+            this.message.next(response);
+        });
+    }
 
-  onStop() {
-    this._message.next('stop');
-  }
+    onStop() {
+        this.message.next('STOP');
+    }
 }

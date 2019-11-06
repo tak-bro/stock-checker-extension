@@ -13,14 +13,13 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     if (message === 'CHECK_CART_FORM') {
         let cartFormElement = document.getElementById('addToCartFormHolder');
         const checkCartFormElement$ = of(cartFormElement).pipe(
-            filter((cartForm) => {
+            tap(cartForm => {
                 if (!cartForm) {
                     cartFormElement = document.getElementById('addToCartFormHolder');
                 }
-                return cartForm ? true : false;
             }),
-            delay(300),
-            switchMap((cartForm) => {
+            filter(cartForm => cartForm.classList ? true : false),
+            switchMap(cartForm => {
                 // check form element
                 const isHideCartForm = cartForm.classList.contains('hide');
                 return of(isHideCartForm);
@@ -30,25 +29,21 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         const addToCart$ = checkCartFormElement$.pipe(
             filter(isHide => isHide ? false : true),
             switchMap(() => of(document.getElementById('addToCartSubmit'))),
-            tap((addToCartButtonElement) => addToCartButtonElement.click()),
-            switchMap((addToCartButtonElement) => fromEvent(addToCartButtonElement, 'click')),
-            map(() => 'done'),
+            tap(addToCartButtonElement => addToCartButtonElement.click()),
+            switchMap(addToCartButtonElement => fromEvent(addToCartButtonElement, 'click')),
+            map(() => 'DONE'),
         );
 
         const refreshPage$ = checkCartFormElement$.pipe(
             filter(isHide => isHide ? true : false),
-            switchMap(() => {
-                const sendMessageStructure = (message: any, callback: (result: any) => void) => chrome.runtime.sendMessage(message, callback);
-                const sendMessageCallback$ = bindCallback(sendMessageStructure);
-                return sendMessageCallback$({ message: 'REFRESH_PAGE', tabId: tabId });
-            }),
-            filter(res => res === 'RELOADED' ? true : false),
+            map(() => 'REFRESH'),
         );
 
         addToCart$.subscribe(res => respond(res));
         refreshPage$.subscribe(res => respond(res));
     } else {
         console.log(`Message: ${message}, TabId: ${tabId}`);
+        respond('unknown message from Content');
     }
 
     return true;

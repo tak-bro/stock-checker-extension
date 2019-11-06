@@ -6,15 +6,15 @@ import { TAB_ID } from './app/tab-id.injector';
 import { environment } from './environments/environment';
 
 chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-  if (environment.production) {
-    enableProdMode();
-  }
+    if (environment.production) {
+        enableProdMode();
+    }
 
-  const tab = [...tabs].pop();
-  const { id: tabId } = tab;
+    const tab = [...tabs].pop();
+    const { id: tabId } = tab;
 
-  // provides the current Tab ID so you can send messages to the content page
-  platformBrowserDynamic([{ provide: TAB_ID, useValue: tabId }])
-    .bootstrapModule(AppModule)
-    .catch(error => console.error(error));
+    // provides the current Tab ID so you can send messages to the content page
+    platformBrowserDynamic([{ provide: TAB_ID, useValue: tabId }])
+        .bootstrapModule(AppModule)
+        .catch(error => console.error(error));
 });
