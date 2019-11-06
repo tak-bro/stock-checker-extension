@@ -20,11 +20,14 @@ export class AppComponent implements OnInit {
     constructor(@Inject(TAB_ID) private readonly tabId: number) {}
 
     ngOnInit() {
-        this.message$.pipe(filter(() => this.isPossible)).subscribe(message => {
+        this.message$.pipe(
+            filter(() => this.isPossible),
+            filter(message => message ? true : false),
+        ).subscribe(message => {
             switch (message) {
                 case 'DONE':
                     alert('Added to cart!');
-                    this.isPossible = !this.isPossible;
+                    this.isPossible = false;
                     break;
                 case 'REFRESH':
                     chrome.runtime.sendMessage({ message: 'REFRESH_PAGE', tabId: this.currentTabId }, response => {
@@ -45,7 +48,7 @@ export class AppComponent implements OnInit {
     }
 
     onStart() {
-        this.isPossible = !this.isPossible;
+        this.isPossible = true;
         chrome.runtime.sendMessage({ message: 'INITIAL_LOAD', tabId: this.currentTabId }, response => {
             this.message.next(response);
         });
@@ -53,6 +56,6 @@ export class AppComponent implements OnInit {
 
     onStop() {
         alert('Stopped!'); // TODO: add stopped
-        this.isPossible = !this.isPossible;
+        this.isPossible = false;
     }
 }
