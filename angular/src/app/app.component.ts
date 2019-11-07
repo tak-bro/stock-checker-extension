@@ -29,18 +29,29 @@ export class AppComponent implements AfterViewInit {
     constructor(@Inject(TAB_ID) private readonly tabId: number) {}
 
     ngAfterViewInit() {
+        this.checkResponseFromEvent(); // 백그라운드에서 체크하면 결제할 때 리프레시할 수도 있음
+        this.checkPlusMinusButtonStream();
+    }
+
+    onStart() {
+        this.isInit = false;
+        this.isPossible = true;
+        this.sendInitialLoadMessage();
+    }
+
+    private checkResponseFromEvent() {
         const validMessage$ = this.message$.pipe(
             filter(() => this.isPossible),
-            filter(message => message ? true : false),
+            filter(message => message),
         );
 
-        // check response from event
         validMessage$.subscribe(message => {
             this.manageResponseMessage(message);
             console.log(`Message: ${message}`);
         });
+    }
 
-        // check plus, minus button stream
+    private checkPlusMinusButtonStream() {
         const minus$ = fromEvent(this.minusButton.nativeElement, 'click').pipe(mapTo(-1));
         const plus$ = fromEvent(this.plusButton.nativeElement, 'click').pipe(mapTo(1));
         const plusAndMinusStream$ = merge(plus$, minus$).pipe(
@@ -53,23 +64,17 @@ export class AppComponent implements AfterViewInit {
         });
     }
 
-    onStart() {
-        this.isInit = false;
-        this.isPossible = true;
-        this.checkInitialPage();
-    }
-
     private manageResponseMessage(message: string) {
         switch (message) {
             case 'REFRESH':
-                this.refreshPage();
+                this.sendRefreshMessage();
                 break;
             case 'SUCCESS':
                 this.sendSuccessMessage();
                 break;
             case 'RELOADED':
             default:
-                setTimeout(() => this.checkInitialPage(), this.refreshDelay * 1000);
+                setTimeout(() => this.sendInitialLoadMessage(), this.refreshDelay * 1000);
                 break;
         }
     }
@@ -79,13 +84,13 @@ export class AppComponent implements AfterViewInit {
         chrome.runtime.sendMessage({ message: 'SUCCESS_TO_ADD', tabId: this.currentTabId });
     }
 
-    private refreshPage() {
+    private sendRefreshMessage() {
         chrome.runtime.sendMessage({ message: 'REFRESH_PAGE', tabId: this.currentTabId }, response => {
             this.message.next(response);
         });
     }
 
-    private checkInitialPage() {
+    private sendInitialLoadMessage() {
         chrome.runtime.sendMessage({ message: 'INITIAL_LOAD', tabId: this.currentTabId }, response => {
             this.message.next(response);
         });

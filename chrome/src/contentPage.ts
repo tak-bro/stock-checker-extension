@@ -21,12 +21,12 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
                 cartFormElement = document.getElementById('addToCartFormHolder');
             }
         }),
-        filter(cartForm => cartForm.classList ? true : false),
+        filter(cartForm => cartForm.classList),
         map(cartForm => cartForm.classList.contains('hide')) // check form element
     );
 
     const addToCart$ = checkCartFormElement$.pipe(
-        filter(isHide => isHide ? false : true),
+        filter(outOfStock => !outOfStock),
         switchMap(() => of(document.getElementById('addToCartSubmit'))),
         tap(addToCartButtonElement => addToCartButtonElement.click()),
         switchMap(addToCartButtonElement => fromEvent(addToCartButtonElement, 'click')),
@@ -34,7 +34,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     );
 
     const refreshPage$ = checkCartFormElement$.pipe(
-        filter(isHide => isHide ? true : false),
+        filter(outOfStock => outOfStock),
         map(() => 'REFRESH')
     );
 
