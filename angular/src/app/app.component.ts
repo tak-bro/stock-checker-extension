@@ -42,7 +42,7 @@ export class AppComponent implements AfterViewInit {
     private checkResponseFromEvent() {
         const validMessage$ = this.message$.pipe(
             filter(() => this.isPossible),
-            filter(message => message),
+            filter(message => message ? true : false),
         );
 
         validMessage$.subscribe(message => {
