@@ -5,6 +5,17 @@
 
 </div>
 <h2>루이비떵 Auto Refresh</h2>
-<button (click)="onStart()">Start</button>
-<button (click)="onStop()">Stop</button>
-<div style="margin-top: 10px;">status: <strong>{{ isPossible ? 'Checking...' : 'Stopped!' }}</strong></div>
+<div *ngIf="isInit">
+    <span>Delay: </span>
+    <button #minusButton id="minus_button">-</button>
+    <strong>{{ refreshDelay }}</strong>
+    <button #plusButton id="plus_button">+</button>
+    <span>sec</span>
+</div>
+<div *ngIf="isInit" style="margin-top: 10px;">
+    <button (click)="onStart()" style="width: 100%;">Start</button>
+</div>
+
+<div style="margin-top: 10px;" *ngIf="!isInit">
+    <strong>Checking every {{ refreshDelay }} seconds...</strong>
+</div>

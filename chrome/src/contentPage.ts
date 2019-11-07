@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     }
     const { tabId, message } = request;
 
-    if (message !== 'CHECK_CART_FORM') {
+    if (message !== 'CONTENT_CHECK_CART_FORM') {
         console.log(`Message: ${message}, TabId: ${tabId}`);
         respond('Unknown message from ContentPage');
     }
@@ -22,11 +22,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
             }
         }),
         filter(cartForm => cartForm.classList ? true : false),
-        switchMap(cartForm => {
-            // check form element
-            const isHideCartForm = cartForm.classList.contains('hide');
-            return of(isHideCartForm);
-        })
+        map(cartForm => cartForm.classList.contains('hide')) // check form element
     );
 
     const addToCart$ = checkCartFormElement$.pipe(
@@ -34,18 +30,16 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         switchMap(() => of(document.getElementById('addToCartSubmit'))),
         tap(addToCartButtonElement => addToCartButtonElement.click()),
         switchMap(addToCartButtonElement => fromEvent(addToCartButtonElement, 'click')),
-        tap(() => {
-            chrome.runtime.sendMessage({ message: 'SUCCESS_TO_ADD', tabId });
-        }),
-        map(() => 'DONE') // 이게 소용이 없음
+        map(() => 'SUCCESS'),
     );
 
     const refreshPage$ = checkCartFormElement$.pipe(
         filter(isHide => isHide ? true : false),
-        map(() => 'REFRESH') // 이게 소용이 없음
+        map(() => 'REFRESH')
     );
 
     addToCart$.subscribe(res => respond(res));
     refreshPage$.subscribe(res => respond(res));
+
     return true;
 });
