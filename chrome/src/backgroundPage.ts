@@ -1,17 +1,29 @@
-import { throwError } from 'rxjs/internal/observable/throwError';
+let count = 0;
 
 chrome.runtime.onMessage.addListener((request, sender, respond) => {
     if (!request) {
-        throwError('request is empty');
+        respond('request is empty');
     }
 
     const { message, tabId } = request;
-    if (message === 'REFRESH_PAGE') {
-        chrome.tabs.reload();
-        setTimeout(() => {
-            chrome.tabs.sendMessage(tabId, { message: 'CHECK_CART_FORM', tabId: tabId });
-        }, 3000);
-    } else if (message === 'STOP_REFRESH') {
-        // do nothing
+    switch (message) {
+        case 'REFRESH_PAGE':
+            chrome.tabs.reload(tabId);
+            console.log(`Reloaded! ${count++} times`);
+            respond('RELOADED');
+            break;
+        case 'INITIAL_LOAD':
+            chrome.tabs.sendMessage(tabId, { message: 'CONTENT_CHECK_CART_FORM', tabId }, res => {
+                respond(res || 'REFRESH'); // SUCCESS or REFRESH
+            });
+            break;
+        case 'SUCCESS_TO_ADD':
+            console.log(`Success to add item on ${new Date().toString()}`);
+            break;
+        default:
+            console.log(`Message: ${message}, TabId: ${tabId}`);
+            break;
     }
+
+    return true;
 });
