@@ -1,6 +1,5 @@
 import { of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { fromEvent } from 'rxjs/internal/observable/fromEvent';
 
 chrome.runtime.onMessage.addListener((request, sender, respond) => {
     if (!request) {
@@ -29,7 +28,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         filter(outOfStock => !outOfStock), // in stock
         switchMap(() => of(document.getElementById('addToCartSubmit'))),
         tap(addToCartButtonElement => addToCartButtonElement.click()),
-        switchMap(addToCartButtonElement => fromEvent(addToCartButtonElement, 'click')),
+        // switchMap(addToCartButtonElement => fromEvent(addToCartButtonElement, 'click')), // TODO: add clicked event listener
         map(() => 'SUCCESS'),
     );
 

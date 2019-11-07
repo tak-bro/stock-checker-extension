@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { SlackService } from './services/slack.service';
 import { Subject } from 'rxjs';
 
 import { TAB_ID } from './tab-id.injector';
@@ -26,7 +27,8 @@ export class AppComponent implements AfterViewInit {
     isInit = true;
     refreshDelay = 5;
 
-    constructor(@Inject(TAB_ID) private readonly tabId: number) {}
+    constructor(@Inject(TAB_ID) private readonly tabId: number,
+                private slackService: SlackService) {}
 
     ngAfterViewInit() {
         this.checkResponseFromEvent(); // 백그라운드에서 체크하면 결제할 때 리프레시할 수도 있음
@@ -80,6 +82,8 @@ export class AppComponent implements AfterViewInit {
     }
 
     private sendSuccessMessage() {
+        // send to slack
+        this.slackService.postToSlack();
         // to log on backgroundPage
         chrome.runtime.sendMessage({ message: 'SUCCESS_TO_ADD', tabId: this.currentTabId });
     }
