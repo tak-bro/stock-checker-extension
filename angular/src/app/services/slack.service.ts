@@ -6,8 +6,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class SlackService {
 
-    private readonly SUJI_ETC_WEBHOOK = 'https://hooks.slack.com/services/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';
-    private readonly TAK_ID = 'UNYNZKXDX';
+    private readonly WEBHOOK_URL = 'https://hooks.slack.com/services/.../.../...';
+    private readonly USER_ID = '...';
     private readonly options = {
         headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     };
@@ -16,8 +16,8 @@ export class SlackService {
 
     postToSlack(): void {
         const message = {
-            text: `LouisVuitton Item In Stock! <@${this.TAK_ID}>`,
+            text: `LouisVuitton Item In Stock! <@${this.USER_ID}>`,
         };
-        this.http.post(this.SUJI_ETC_WEBHOOK, message, this.options).subscribe();
+        this.http.post(this.WEBHOOK_URL, message, this.options).subscribe();
     }
 }
