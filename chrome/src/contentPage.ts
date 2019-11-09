@@ -39,6 +39,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
                 proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
             }
         }),
+        filter(button => button ? true : false),
         map((checkoutButton: any) => checkoutButton.disabled ? 'REFRESH' : 'SUCCESS')
     );
 
@@ -49,7 +50,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
 
     // addToCart$.subscribe(res => respond(res));
     canProceedToCheckout$.subscribe(res => respond(res));
-    refreshPage$.subscribe(res => respond(res));
+    // refreshPage$.subscribe(res => respond(res));
 
     return true;
 });
