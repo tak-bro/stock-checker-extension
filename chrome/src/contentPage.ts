@@ -32,12 +32,23 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         map(() => 'SUCCESS'),
     );
 
+    let proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
+    const canProceedToCheckout$ = of(proceedToCheckoutButton).pipe(
+        tap(checkoutButton => {
+            if (!checkoutButton) {
+                proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
+            }
+        }),
+        map((checkoutButton: any) => checkoutButton.disabled ? 'REFRESH' : 'SUCCESS')
+    );
+
     const refreshPage$ = checkCartFormElement$.pipe(
         filter(outOfStock => outOfStock),
         map(() => 'REFRESH')
     );
 
-    addToCart$.subscribe(res => respond(res));
+    // addToCart$.subscribe(res => respond(res));
+    canProceedToCheckout$.subscribe(res => respond(res));
     refreshPage$.subscribe(res => respond(res));
 
     return true;

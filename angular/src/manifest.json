@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
-    "name": "Angular Chrome Extension",
-    "short_name": "Angular Chrome Extension",
-    "version": "1.0.0",
+    "name": "LouisVuitton Cart Check",
+    "short_name": "LouisVuitton Cart Check",
+    "version": "2.0.0",
     "description": "Angular Chrome Extension scaffold project",
     "permissions": ["tabs"],
     "browser_action": {
