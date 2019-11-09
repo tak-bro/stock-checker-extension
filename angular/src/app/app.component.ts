@@ -85,7 +85,9 @@ export class AppComponent implements AfterViewInit {
         // send to slack
         this.slackService.postToSlack();
         // to log on backgroundPage
-        chrome.runtime.sendMessage({ message: 'SUCCESS_TO_ADD', tabId: this.currentTabId });
+        chrome.runtime.sendMessage({ message: 'SUCCESS_TO_ADD', tabId: this.currentTabId }, response => {
+            this.message.next(response);
+        });
     }
 
     private sendRefreshMessage() {

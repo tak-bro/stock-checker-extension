@@ -19,6 +19,9 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
             break;
         case 'SUCCESS_TO_ADD':
             console.log(`Success to add item on ${new Date().toString()}`);
+            // 메세지 전달 후에도 계속 리프레시...
+            chrome.tabs.reload(tabId);
+            respond('RELOADED'); 
             break;
         default:
             console.log(`Message: ${message}, TabId: ${tabId}`);
