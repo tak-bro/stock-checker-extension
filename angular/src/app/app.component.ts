@@ -77,13 +77,15 @@ export class AppComponent implements AfterViewInit {
         });
     }
 
-    private manageResponseMessage(message: string) {
+    private manageResponseMessage(text: string) {
+        const [message, ...product] = text.split('_');
         switch (message) {
             case 'REFRESH':
                 this.sendRefreshMessage();
                 break;
             case 'SUCCESS':
-                this.sendSuccessMessage();
+                const productName = product.join('_');
+                this.sendSuccessMessage(productName);
                 break;
             case 'RELOADED':
             default:
@@ -117,9 +119,9 @@ export class AppComponent implements AfterViewInit {
         });
     }
 
-    private sendSuccessMessage() {
+    private sendSuccessMessage(productName: string) {
         // send to slack
-        this.slackService.postToSlack(this.checkType);
+        this.slackService.postToSlack(this.checkType, productName);
         // to log on backgroundPage
         chrome.runtime.sendMessage({ message: 'ITEM_IN_STOCK', tabId: this.currentTabId }, response => {
             this.message.next(response);

@@ -15,11 +15,16 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         respond('Unknown message from ContentPage');
     }
 
-    // STEP 1
     const isProductMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_PRODUCT_FORM'));
     const isCartMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_CART_FORM'));
+    const nameInProductPage$ = of(document.getElementById('productName')).pipe(map(ele => ele.innerText));
+    const nameInCartPage$ = of(document.getElementsByClassName('productName')).pipe(
+        map((elements: any) => elements.length > 0 ? elements[0].innerText : '')
+    );
 
     let cartFormElement = document.getElementById('addToCartFormHolder');
+    let proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
+
     const checkCartFormElement$ = isProductMessage$.pipe(
         switchMap(() => of(cartFormElement)),
         tap(cartForm => {
@@ -37,7 +42,8 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         tap(addToCartButtonElement => addToCartButtonElement.click()),
         // switchMap(addToCartButtonElement => fromEvent(addToCartButtonElement, 'click')), // TODO: add clicked event listener
         delay(500),
-        map(() => 'SUCCESS'),
+        switchMap(() => nameInProductPage$),
+        map(productName => `SUCCESS_${productName}`)
     );
 
     const refreshPage$ = checkCartFormElement$.pipe(
@@ -45,23 +51,34 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         map(() => 'REFRESH')
     );
 
-    addToCart$.subscribe(res => respond(res));
-    refreshPage$.subscribe(res => respond(res));
-
-    // STEP 2
-    let proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
-    const canProceedToCheckout$ = isCartMessage$.pipe(
+    const proceedCheckoutButton$ = isCartMessage$.pipe(
         switchMap(() => of(proceedToCheckoutButton)),
         tap(checkoutButton => {
             if (!checkoutButton) {
                 proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
             }
         }),
-        filter(button => button ? true : false),
-        map((checkoutButton: any) => checkoutButton.disabled ? 'REFRESH' : 'SUCCESS')
+        filter(button => button ? true : false)
     );
 
+    const cannotProceedToCheckout$ = proceedCheckoutButton$.pipe(
+        filter((checkoutButton: any) => checkoutButton.disabled),
+        map(() => 'REFRESH')
+    );
+
+    const canProceedToCheckout$ = proceedCheckoutButton$.pipe(
+        filter((checkoutButton: any) => !checkoutButton.disabled),
+        switchMap(() => nameInCartPage$),
+        map(productName => `SUCCESS_${productName}`)
+    );
+
+    // STEP 1
+    addToCart$.subscribe(res => respond(res));
+    refreshPage$.subscribe(res => respond(res));
+
+    // STEP 2
     canProceedToCheckout$.subscribe(res => respond(res));
+    cannotProceedToCheckout$.subscribe(res => respond(res));
 
     return true;
 });

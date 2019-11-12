@@ -14,10 +14,10 @@ export class SlackService {
 
     constructor(private http: HttpClient) { }
 
-    postToSlack(type: string) {
+    postToSlack(type: string, productName: string) {
         const text = (type === 'PRODUCT')
-            ? `STEP1 - Item In Stock! <@${this.USER_ID}>`
-            : `STEP2 - Can Proceed To Checkout! <@${this.USER_ID}>`;
+            ? `STEP1 - ${productName} In Stock! <@${this.USER_ID}>`
+            : `STEP2 - ${productName} Can Proceed To Checkout! <@${this.USER_ID}>`;
 
         const message = { text };
         this.http.post(this.WEBHOOK_URL, message, this.options).subscribe();

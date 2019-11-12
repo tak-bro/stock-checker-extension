@@ -1,13 +1,13 @@
 {
     "manifest_version": 2,
-    "name": "LouisVuitton Cart Check",
-    "short_name": "LouisVuitton Cart Check",
+    "name": "StockChecker @LouisVuitton",
+    "short_name": "Stock Checker",
     "version": "2.0.0",
-    "description": "Angular Chrome Extension scaffold project",
+    "description": "Stock checker for LouisVuitton item",
     "permissions": ["tabs"],
     "browser_action": {
         "default_popup": "index.html",
-        "default_title": "Angular Chrome Extension"
+        "default_title": "StockChecker @LouisVuitton"
     },
     "content_scripts": [
         {
