@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { delay, filter, map, switchMap, tap } from 'rxjs/operators';
+import { delay, filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 const ALLOWED_MESSAGE = ['CONTENT_CHECK_PRODUCT_FORM', 'CONTENT_CHECK_CART_FORM'];
 
@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     const isCartMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_CART_FORM'));
     const nameInProductPage$ = of(document.getElementById('productName')).pipe(map(ele => ele.innerText));
     const nameInCartPage$ = of(document.getElementsByClassName('productName')).pipe(
-        map((elements: any) => elements.length > 0 ? elements[0].innerText : '')
+        map((elements: any) => elements.length > 0 ? elements[0].innerText : null)
     );
 
     let cartFormElement = document.getElementById('addToCartFormHolder');
@@ -62,22 +62,21 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     );
 
     const cannotProceedToCheckout$ = proceedCheckoutButton$.pipe(
-        filter((checkoutButton: any) => checkoutButton.disabled),
+        withLatestFrom(nameInCartPage$),
+        filter(([checkoutButton, productName]) => checkoutButton.disabled && productName !== null),
         map(() => 'REFRESH')
     );
 
     const canProceedToCheckout$ = proceedCheckoutButton$.pipe(
-        filter((checkoutButton: any) => !checkoutButton.disabled),
-        switchMap(() => nameInCartPage$),
-        filter(name => name !== '' ? true : false),
+        withLatestFrom(nameInCartPage$),
+        filter(([checkoutButton, productName]) => !checkoutButton.disabled && productName !== null),
         map(productName => `SUCCESS_${productName}`)
     );
 
-    const shouldLoginMessage$ = proceedCheckoutButton$.pipe(
-        filter((checkoutButton: any) => !checkoutButton.disabled),
+    const shouldLogin$ = proceedCheckoutButton$.pipe(
         switchMap(() => nameInCartPage$),
-        filter(name => name === '' ? true : false),
-        map(() => `ERROR`)
+        filter(name => name === null ? true : false),
+        map(() => 'ERROR_SHOULD_LOGIN')
     );
 
     // STEP 1
@@ -87,7 +86,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     // STEP 2
     canProceedToCheckout$.subscribe(res => respond(res));
     cannotProceedToCheckout$.subscribe(res => respond(res));
-    shouldLoginMessage$.subscribe(res => respond(res));
+    shouldLogin$.subscribe(res => respond(res));
 
     return true;
 });

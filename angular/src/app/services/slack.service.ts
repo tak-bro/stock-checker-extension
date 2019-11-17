@@ -23,8 +23,8 @@ export class SlackService {
         this.http.post(this.WEBHOOK_URL, message, this.options).subscribe();
     }
 
-    reportError() {
-        const text = 'Error! Should login to server!';
+    reportError(errorMessage: string) {
+        const text = `Error! ${errorMessage}`;
         const message = { text };
         this.http.post(this.WEBHOOK_URL, message, this.options).subscribe();
     }

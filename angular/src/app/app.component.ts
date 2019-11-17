@@ -78,16 +78,17 @@ export class AppComponent implements AfterViewInit {
     }
 
     private manageResponseMessage(text: string) {
-        const [message, ...product] = text.split('_');
+        const [message, ...productOrError] = text.split('_');
         switch (message) {
             case 'ERROR':
-                this.sendShouldLoginMessage();
+                const errorMessage = productOrError.join('_');
+                this.doReportError(errorMessage);
                 break;
             case 'REFRESH':
                 this.sendRefreshMessage();
                 break;
             case 'SUCCESS':
-                const productName = product.join('_');
+                const productName = productOrError.join('_');
                 this.sendSuccessMessage(productName);
                 break;
             case 'RELOADED':
@@ -137,7 +138,7 @@ export class AppComponent implements AfterViewInit {
         });
     }
 
-    private sendShouldLoginMessage() {
-        this.slackService.reportError();
+    private doReportError(message: string) {
+        this.slackService.reportError(message); // do nothing after sending error
     }
 }
