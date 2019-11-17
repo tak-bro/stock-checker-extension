@@ -80,6 +80,9 @@ export class AppComponent implements AfterViewInit {
     private manageResponseMessage(text: string) {
         const [message, ...product] = text.split('_');
         switch (message) {
+            case 'ERROR':
+                this.sendShouldLoginMessage();
+                break;
             case 'REFRESH':
                 this.sendRefreshMessage();
                 break;
@@ -134,4 +137,7 @@ export class AppComponent implements AfterViewInit {
         });
     }
 
+    private sendShouldLoginMessage() {
+        this.slackService.reportError();
+    }
 }

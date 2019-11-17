@@ -69,7 +69,15 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     const canProceedToCheckout$ = proceedCheckoutButton$.pipe(
         filter((checkoutButton: any) => !checkoutButton.disabled),
         switchMap(() => nameInCartPage$),
+        filter(name => name !== '' ? true : false),
         map(productName => `SUCCESS_${productName}`)
+    );
+
+    const shouldLoginMessage$ = proceedCheckoutButton$.pipe(
+        filter((checkoutButton: any) => !checkoutButton.disabled),
+        switchMap(() => nameInCartPage$),
+        filter(name => name === '' ? true : false),
+        map(() => `ERROR`)
     );
 
     // STEP 1
@@ -79,6 +87,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     // STEP 2
     canProceedToCheckout$.subscribe(res => respond(res));
     cannotProceedToCheckout$.subscribe(res => respond(res));
+    shouldLoginMessage$.subscribe(res => respond(res));
 
     return true;
 });
