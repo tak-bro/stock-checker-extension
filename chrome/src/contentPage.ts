@@ -63,13 +63,13 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
 
     const cannotProceedToCheckout$ = proceedCheckoutButton$.pipe(
         withLatestFrom(nameInCartPage$),
-        filter(([checkoutButton, productName]) => checkoutButton.disabled && productName !== null),
+        filter(([checkoutButton, productName]) => checkoutButton['disabled'] && productName !== null),
         map(() => 'REFRESH')
     );
 
     const canProceedToCheckout$ = proceedCheckoutButton$.pipe(
         withLatestFrom(nameInCartPage$),
-        filter(([checkoutButton, productName]) => !checkoutButton.disabled && productName !== null),
+        filter(([checkoutButton, productName]) => !checkoutButton['disabled'] && productName !== null),
         map(productName => `SUCCESS_${productName}`)
     );
 
