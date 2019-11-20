@@ -70,6 +70,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     const canProceedToCheckout$ = proceedCheckoutButton$.pipe(
         withLatestFrom(nameInCartPage$),
         filter(([checkoutButton, productName]) => !checkoutButton['disabled'] && productName !== null),
+        map(([checkoutButton, productName]) => productName),
         map(productName => `SUCCESS_${productName}`)
     );
 
