@@ -1,31 +1,55 @@
-# Angular Chrome Extension Scaffold Project (Angular 7)
+<h1 align="center">StockChecker @LouisVuitton</h1>
+<p>
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
+  <a href="https://github.com/tak-bro/stock-checker-extension/blob/develop/LICENSE">
+    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" target="_blank" />
+  </a>
+</p>
 
-This project is an Angular scaffold project (template) for google chrome extensions, see [Github.](https://github.com/larscom/angular-chrome-extension)
+> Auto stock checker chrome-extension @louisvuitton
 
-## How to use/develop
-- clone this repository
-- run `npm install`
-- run `npm run watch`
-- goto: `chrome://extensions` in the browser and enable 'developer mode'
-- press `Load unpacked` and target the folder `angular/dist`
+## Install
 
-The project is automatically being watched, any changes to the files will recompile the project.
+```sh
+npm install
+```
 
-**NOTE**: changes to the contentPage/backgroundPage requires you to reload the extension in `chrome://extensions`
+## Usage
+
+```sh
+npm run watch
+```
+
+## Build Production
+
+```sh
+npm run build:production
+```
+
+## Demo
+
+[![Demo](https://user-images.githubusercontent.com/7614353/69537413-65d94a80-0fc3-11ea-8864-9ec99eae4939.gif)](https://drive.google.com/file/d/1saf0SsyALzr9zmG88CcRpFdeT2PfN6ir/view)
 
 
-## Build/package for production
+## Author
 
-- run `npm run build:production`
-- upload `extension-build.zip` to the chrome webstore.
-- (optional) you can also manually zip your extension, the production build will output to folder `angular/dist`
+👤 **Hyungtak Jin**
 
-This will run a production build and will automatically zip it as a extension package in the root folder `./` named: `extension-build.zip`
+* Github: [@tak-bro](https://github.com/tak-bro)
+* LinkedIn: [@hyungtak](https://www.linkedin.com/in/hyungtak/)
 
-**NOTE**: Do not forget to update the version number inside `manifest.json`
+## 🤝 Contributing
 
-## Angular folder
-This folder contains the angular source code.
+Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/tak-bro/stock-checker-extension/issues).
 
-## Chrome folder
-This folder contains the contentPage/backgroundPage script for the google chrome extension
+## Show your support
+
+Give a ⭐️ if this project helped you!
+
+## 📝 License
+
+Copyright © 2019 [tak-bro](https://github.com/tak-bro).<br />
+This project is [MIT](https://github.com/tak-bro/stock-checker-extension/blob/develop/LICENSE) licensed.
+
+***
+_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
