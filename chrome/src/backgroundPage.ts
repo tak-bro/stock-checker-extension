@@ -18,12 +18,12 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
             });
             break;
         case 'REFRESH_PAGE':
-            console.log(`Reloaded! ${count++} times`);
+            console.log(`Reloaded! ${count++} times on ${new Date().toLocaleString()}`);
             chrome.tabs.reload(tabId);
             respond('RELOADED');
             break;
         case 'ITEM_IN_STOCK':
-            console.log(`Item In Stock on ${new Date().toString()}!`);
+            console.log(`Item In Stock on ${new Date().toLocaleString()}!`);
             // 메세지 전달 후에도 계속 리프레시...
             chrome.tabs.reload(tabId);
             respond('RELOADED');
