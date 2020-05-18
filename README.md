@@ -11,19 +11,30 @@
 ## Install
 
 ```sh
-npm install
+$ npm install
 ```
 
 ## Usage
 
+> **Modify USER_ID and WEBHOOK_URL on angular/src/app/services/slack.service.ts**
+
+```typescript
+...
+    private readonly WEBHOOK_URL = 'YOUR_SLACK_WEB_HOOK';
+    private readonly USER_ID = 'YOUR_USER_ID';
+...
+```
+
+#### Run on local
+
 ```sh
-npm run watch
+$ npm run watch
 ```
 
 ## Build Production
 
 ```sh
-npm run build:production
+$ npm run build:production
 ```
 
 ## Demo
