@@ -7,8 +7,8 @@ import { distinctUntilChanged, filter, mapTo, scan } from 'rxjs/operators';
 import { fromEvent } from 'rxjs/internal/observable/fromEvent';
 import { merge } from 'rxjs/internal/observable/merge';
 
-const DELAY_MIN = 1;
-const DELAY_MAX = 30;
+const DELAY_MIN = 10;
+const DELAY_MAX = 1000;
 
 @Component({
     selector: 'app-root',
@@ -53,8 +53,8 @@ export class AppComponent implements AfterViewInit {
     }
 
     private checkPlusMinusButtonStream() {
-        const minus$ = fromEvent(this.minusButton.nativeElement, 'click').pipe(mapTo(-1));
-        const plus$ = fromEvent(this.plusButton.nativeElement, 'click').pipe(mapTo(1));
+        const minus$ = fromEvent(this.minusButton.nativeElement, 'click').pipe(mapTo(-10));
+        const plus$ = fromEvent(this.plusButton.nativeElement, 'click').pipe(mapTo(10));
         const plusAndMinusStream$ = merge(plus$, minus$).pipe(
             scan((acc, curr) => Math.max(Math.min(acc + curr, DELAY_MAX), DELAY_MIN), this.refreshDelay),
             distinctUntilChanged(),
