@@ -1,4 +1,6 @@
+const MAX_REFRESH_COUNT = 3000;
 let count = 0;
+let isAddedToCart = false;
 
 chrome.runtime.onMessage.addListener((request, sender, respond) => {
     if (!request) {
@@ -24,6 +26,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
             break;
         case 'ITEM_IN_STOCK':
             console.log(`Item In Stock on ${new Date().toLocaleString()}!`);
+            isAddedToCart = true;
             // 메세지 전달 후에도 계속 리프레시...
             chrome.tabs.reload(tabId);
             respond('RELOADED');
@@ -31,6 +34,18 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         default:
             console.log(`Message: ${message}, TabId: ${tabId}`);
             break;
+    }
+
+    if (count > MAX_REFRESH_COUNT && !isAddedToCart) {
+        chrome.storage.local.clear(() => {
+            const error = chrome.runtime.lastError;
+            if (error) {
+                console.error(error);
+            } else {
+                console.log(`Clear LocalStorage`);
+                count = 0;
+            }
+        });
     }
 
     return true;

@@ -26,13 +26,14 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     let proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
 
     const checkCartFormElement$ = isProductMessage$.pipe(
+        delay(200),
         switchMap(() => of(cartFormElement)),
         tap(cartForm => {
             if (!cartForm) {
                 cartFormElement = document.getElementById('addToCartFormHolder');
             }
         }),
-        filter(cartForm => cartForm.classList ? true : false),
+        filter(cartForm => !!cartForm.classList),
         map(cartForm => cartForm.classList.contains('hide')) // check form element
     );
 
@@ -40,8 +41,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         filter(outOfStock => !outOfStock), // in stock
         switchMap(() => of(document.getElementById('addToCartSubmit'))),
         tap(addToCartButtonElement => addToCartButtonElement.click()),
-        // switchMap(addToCartButtonElement => fromEvent(addToCartButtonElement, 'click')), // TODO: add clicked event listener
-        delay(500),
+        delay(200),
         switchMap(() => nameInProductPage$),
         map(productName => `SUCCESS_${productName}`)
     );
@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
                 proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
             }
         }),
-        filter(button => button ? true : false)
+        filter(button => !!button)
     );
 
     const cannotProceedToCheckout$ = proceedCheckoutButton$.pipe(
@@ -70,13 +70,13 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
     const canProceedToCheckout$ = proceedCheckoutButton$.pipe(
         withLatestFrom(nameInCartPage$),
         filter(([checkoutButton, productName]) => !checkoutButton['disabled'] && productName !== null),
-        map(([checkoutButton, productName]) => productName),
+        map(([_, productName]) => productName),
         map(productName => `SUCCESS_${productName}`)
     );
 
     const shouldLogin$ = proceedCheckoutButton$.pipe(
         switchMap(() => nameInCartPage$),
-        filter(name => name === null ? true : false),
+        filter(name => name === null),
         map(() => 'ERROR_SHOULD_LOGIN')
     );
 

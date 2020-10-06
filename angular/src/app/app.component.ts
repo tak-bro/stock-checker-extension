@@ -68,7 +68,7 @@ export class AppComponent implements AfterViewInit {
     private checkResponseFromEvent() {
         const validMessage$ = this.message$.pipe(
             filter(() => this.isPossible),
-            filter(message => message ? true : false),
+            filter(message => !!message),
         );
 
         validMessage$.subscribe(message => {
@@ -96,6 +96,7 @@ export class AppComponent implements AfterViewInit {
                 setTimeout(() => this.sendInitialMessage(), this.refreshDelay * 1000);
                 break;
         }
+        return;
     }
 
     private sendInitialMessage() {
@@ -112,33 +113,27 @@ export class AppComponent implements AfterViewInit {
     }
 
     private sendCheckInProductMessage() {
-        chrome.runtime.sendMessage({ message: 'CHECK_IN_PRODUCT', tabId: this.currentTabId }, response => {
-            this.message.next(response);
-        });
+        chrome.runtime.sendMessage({ message: 'CHECK_IN_PRODUCT', tabId: this.currentTabId }, this.setMessage$);
     }
 
     private sendCheckInCartMessage() {
-        chrome.runtime.sendMessage({ message: 'CHECK_IN_CART', tabId: this.currentTabId }, response => {
-            this.message.next(response);
-        });
+        chrome.runtime.sendMessage({ message: 'CHECK_IN_CART', tabId: this.currentTabId }, this.setMessage$);
     }
 
     private sendSuccessMessage(productName: string) {
         // send to slack
         this.slackService.postToSlack(this.checkType, productName);
         // to log on backgroundPage
-        chrome.runtime.sendMessage({ message: 'ITEM_IN_STOCK', tabId: this.currentTabId }, response => {
-            this.message.next(response);
-        });
+        chrome.runtime.sendMessage({ message: 'ITEM_IN_STOCK', tabId: this.currentTabId }, this.setMessage$);
     }
 
     private sendRefreshMessage() {
-        chrome.runtime.sendMessage({ message: 'REFRESH_PAGE', tabId: this.currentTabId }, response => {
-            this.message.next(response);
-        });
+        chrome.runtime.sendMessage({ message: 'REFRESH_PAGE', tabId: this.currentTabId }, this.setMessage$);
     }
 
     private doReportError(message: string) {
         this.slackService.reportError(message); // do nothing after sending error
     }
+
+    private setMessage$ = response => this.message.next(response);
 }

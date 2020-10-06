@@ -2,9 +2,12 @@
     "manifest_version": 2,
     "name": "StockChecker @LouisVuitton",
     "short_name": "Stock Checker",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Stock checker for LouisVuitton item",
-    "permissions": ["tabs"],
+    "permissions": [
+        "tabs",
+        "storage"
+    ],
     "browser_action": {
         "default_popup": "index.html",
         "default_title": "StockChecker @LouisVuitton"
