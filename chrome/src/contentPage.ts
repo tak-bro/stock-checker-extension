@@ -17,39 +17,56 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
 
     const isProductMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_PRODUCT_FORM'));
     const isCartMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_CART_FORM'));
-    const nameInProductPage$ = of(document.getElementById('productName')).pipe(map(ele => ele.innerText));
+    const nameInProductPage$ = of(document.querySelector('.lv-product__title')).pipe(map((ele: any) => ele.innerText));
     const nameInCartPage$ = of(document.getElementsByClassName('productName')).pipe(
         map((elements: any) => elements.length > 0 ? elements[0].innerText : null)
     );
 
-    let cartFormElement = document.getElementById('addToCartFormHolder');
-    let proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
+    // STEP 1
+    let cartFormElement = document.querySelector('.lv-product-purchase__button');
 
-    const checkCartFormElement$ = isProductMessage$.pipe(
+    const canClickCartFormElement$ = isProductMessage$.pipe(
         delay(200),
         switchMap(() => of(cartFormElement)),
         tap(cartForm => {
             if (!cartForm) {
-                cartFormElement = document.getElementById('addToCartFormHolder');
+                cartFormElement = document.querySelector('.lv-product-purchase__button');
             }
         }),
-        filter(cartForm => !!cartForm.classList),
-        map(cartForm => cartForm.classList.contains('hide')) // check form element
+        filter(cartForm => !!cartForm),
+        filter(cartForm => cartForm.tagName.toLowerCase() === 'button'),
     );
 
-    const addToCart$ = checkCartFormElement$.pipe(
-        filter(outOfStock => !outOfStock), // in stock
-        switchMap(() => of(document.getElementById('addToCartSubmit'))),
-        tap(addToCartButtonElement => addToCartButtonElement.click()),
+    const cannotClickCartFormElement$ = isProductMessage$.pipe(
         delay(200),
+        switchMap(() => of(cartFormElement)),
+        tap(cartForm => {
+            if (!cartForm) {
+                cartFormElement = document.querySelector('.lv-product-purchase__button');
+            }
+        }),
+        filter(cartForm => !!cartForm),
+        filter(cartForm => cartForm.tagName.toLowerCase() === 'div'),
+    );
+
+    const addToCart$ = canClickCartFormElement$.pipe(
+        switchMap(() => of(document.querySelector('.lv-product-purchase__button'))),
+        tap((addToCartButtonElement: any) => addToCartButtonElement.click()),
+        delay(5000),
         switchMap(() => nameInProductPage$),
         map(productName => `SUCCESS_${productName}`)
     );
 
-    const refreshPage$ = checkCartFormElement$.pipe(
-        filter(outOfStock => outOfStock),
+    const refreshPage$ = cannotClickCartFormElement$.pipe(
         map(() => 'REFRESH')
     );
+
+    addToCart$.subscribe(res => respond(res));
+    refreshPage$.subscribe(res => respond(res));
+
+    // TODO: refactor below
+    // STEP 2
+    let proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
 
     const proceedCheckoutButton$ = isCartMessage$.pipe(
         switchMap(() => of(proceedToCheckoutButton)),
@@ -80,11 +97,6 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         map(() => 'ERROR_SHOULD_LOGIN')
     );
 
-    // STEP 1
-    addToCart$.subscribe(res => respond(res));
-    refreshPage$.subscribe(res => respond(res));
-
-    // STEP 2
     canProceedToCheckout$.subscribe(res => respond(res));
     cannotProceedToCheckout$.subscribe(res => respond(res));
     shouldLogin$.subscribe(res => respond(res));

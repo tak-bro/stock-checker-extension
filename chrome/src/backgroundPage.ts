@@ -1,4 +1,4 @@
-const MAX_REFRESH_COUNT = 3000;
+const MAX_REFRESH_COUNT = 10000;
 let count = 0;
 let isAddedToCart = false;
 

@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "StockChecker @LouisVuitton",
     "short_name": "Stock Checker",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Stock checker for LouisVuitton item",
     "permissions": [
         "tabs",
