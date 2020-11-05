@@ -88,8 +88,7 @@ export class AppComponent implements AfterViewInit {
                 this.sendRefreshMessage();
                 break;
             case 'SUCCESS':
-                const productName = productOrError.join('_');
-                this.sendSuccessMessage(productName);
+                this.sendSuccessMessage(text);
                 break;
             case 'RELOADED':
             default:
@@ -120,9 +119,14 @@ export class AppComponent implements AfterViewInit {
         chrome.runtime.sendMessage({ message: 'CHECK_IN_CART', tabId: this.currentTabId }, this.setMessage$);
     }
 
-    private sendSuccessMessage(productName: string) {
+    private sendSuccessMessage(text: string) {
+        // check type
+        const [_, type, productName] = text.split('_');
+        console.log(text, _, type, productName);
+        this.checkType = type;
+
         // send to slack
-        this.slackService.postToSlack(this.checkType, productName);
+        this.slackService.postToSlack(type, productName);
         // to log on backgroundPage
         chrome.runtime.sendMessage({ message: 'ITEM_IN_STOCK', tabId: this.currentTabId }, this.setMessage$);
     }
@@ -132,7 +136,9 @@ export class AppComponent implements AfterViewInit {
     }
 
     private doReportError(message: string) {
-        this.slackService.reportError(message); // do nothing after sending error
+        this.slackService.reportError(message);
+        // 단순히 뒤로만 가기 때문에 product에서 cart로 이동할 것
+        chrome.runtime.sendMessage({ message: 'GO_BACK_AND_REFRESH_PAGE', tabId: this.currentTabId }, this.setMessage$);
     }
 
     private setMessage$ = response => this.message.next(response);

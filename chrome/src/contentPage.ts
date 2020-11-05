@@ -15,60 +15,57 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         respond('Unknown message from ContentPage');
     }
 
-    const isProductMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_PRODUCT_FORM'));
-    const isCartMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_CART_FORM'));
-    const nameInProductPage$ = of(document.querySelector('.lv-product__title')).pipe(map((ele: any) => ele.innerText));
-    const nameInCartPage$ = of(document.getElementsByClassName('productName')).pipe(
-        map((elements: any) => elements.length > 0 ? elements[0].innerText : null)
-    );
+    // const isProductMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_PRODUCT_FORM'));
+    // const isCartMessage$ = of(message).pipe(filter(message => message === 'CONTENT_CHECK_CART_FORM'));
 
-    // STEP 1
-    let cartFormElement = document.querySelector('.lv-product-purchase__button');
+    // CASE 1: PRODUCT PAGE
+    let stockIndicatorElement = document.querySelector('.lv-stock-indicator');
+    const isProductPage$ = of(document.querySelector('.lv-product__title')).pipe(filter(productTitle => !!productTitle));
+    const nameInProductPage$ = isProductPage$.pipe(map((ele: any) => ele.innerText));
 
-    const canClickCartFormElement$ = isProductMessage$.pipe(
+    const isInStock$ = isProductPage$.pipe(
         delay(200),
-        switchMap(() => of(cartFormElement)),
-        tap(cartForm => {
-            if (!cartForm) {
-                cartFormElement = document.querySelector('.lv-product-purchase__button');
+        switchMap(() => of(stockIndicatorElement)),
+        tap(stockIndicator => {
+            if (!stockIndicator) {
+                stockIndicatorElement = document.querySelector('.lv-product-stock-indicator');
             }
         }),
-        filter(cartForm => !!cartForm),
-        filter(cartForm => cartForm.tagName.toLowerCase() === 'button'),
+        filter(stockIndicator => !!stockIndicator),
+        filter(stockIndicator => stockIndicator.classList.contains('-available'))
     );
 
-    const cannotClickCartFormElement$ = isProductMessage$.pipe(
+    const isNotInStock$ = isProductPage$.pipe(
         delay(200),
-        switchMap(() => of(cartFormElement)),
-        tap(cartForm => {
-            if (!cartForm) {
-                cartFormElement = document.querySelector('.lv-product-purchase__button');
+        switchMap(() => of(stockIndicatorElement)),
+        tap(stockIndicator => {
+            if (!stockIndicator) {
+                stockIndicatorElement = document.querySelector('.lv-product-stock-indicator');
             }
         }),
-        filter(cartForm => !!cartForm),
-        filter(cartForm => cartForm.tagName.toLowerCase() === 'div'),
+        filter(stockIndicator => !!stockIndicator),
+        filter(stockIndicator => stockIndicator.classList.contains('-not-available'))
     );
 
-    const addToCart$ = canClickCartFormElement$.pipe(
+    const addToCart$ = isInStock$.pipe(
         switchMap(() => of(document.querySelector('.lv-product-purchase__button'))),
         tap((addToCartButtonElement: any) => addToCartButtonElement.click()),
-        delay(5000),
+        delay(500),
         switchMap(() => nameInProductPage$),
-        map(productName => `SUCCESS_${productName}`)
+        map(productName => `SUCCESS_PRODUCT_${productName}`)
     );
 
-    const refreshPage$ = cannotClickCartFormElement$.pipe(
-        map(() => 'REFRESH')
-    );
+    const refreshPage$ = isNotInStock$.pipe(map(() => 'REFRESH'));
 
     addToCart$.subscribe(res => respond(res));
     refreshPage$.subscribe(res => respond(res));
 
-    // TODO: refactor below
-    // STEP 2
+    // CASE 2: CART PAGE
     let proceedToCheckoutButton = document.getElementById('proceedToCheckoutButton');
+    const isCartPage$ = of(document.getElementById('titleMyShoppingBag')).pipe(filter(element => !!element));
+    const nameInCartPage$ = of(document.getElementsByClassName('productName')).pipe(map((elements: any) => elements.length > 0 ? elements[0].innerText : null));
 
-    const proceedCheckoutButton$ = isCartMessage$.pipe(
+    const proceedCheckoutButton$ = isCartPage$.pipe(
         switchMap(() => of(proceedToCheckoutButton)),
         tap(checkoutButton => {
             if (!checkoutButton) {
@@ -88,7 +85,7 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
         withLatestFrom(nameInCartPage$),
         filter(([checkoutButton, productName]) => !checkoutButton['disabled'] && productName !== null),
         map(([_, productName]) => productName),
-        map(productName => `SUCCESS_${productName}`)
+        map(productName => `SUCCESS_CART_${productName}`)
     );
 
     const shouldLogin$ = proceedCheckoutButton$.pipe(

@@ -31,6 +31,11 @@ chrome.runtime.onMessage.addListener((request, sender, respond) => {
             chrome.tabs.reload(tabId);
             respond('RELOADED');
             break;
+        case 'GO_BACK_AND_REFRESH_PAGE':
+            console.log(`Go back and refresh PRODUCT page`);
+            chrome.tabs.goBack(tabId);
+            respond('RELOADED');
+            break;
         default:
             console.log(`Message: ${message}, TabId: ${tabId}`);
             break;
